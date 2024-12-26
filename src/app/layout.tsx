@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import NextSessionProvider from '@/providers/session-provider';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,6 +42,7 @@ export default async function RootLayout({
             {children}
           </NextSessionProvider>
         </ThemeProvider>
+        <Toaster></Toaster>
       </body>
     </html>
   );

@@ -20,6 +20,7 @@ model Teacher {
   password   String
   email      String   @unique
   subjectId  String
+  grade      Grade[]
   subject    Subject  @relation(fields: [subjectId], references: [id])
   role       Role     @default(TEACHER)
 }
@@ -78,7 +79,7 @@ enum Role {
 enum Category {
   KIDS
   JUNIORS
-  SENIORS
+  SENIOR
 }
 
 enum Grade {

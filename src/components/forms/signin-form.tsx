@@ -67,7 +67,7 @@ const SignInForm = () => {
           )}
         />
         <Button type="submit" className="w-full p-6" disabled={isLoading}>
-          {!isLoading ? 'Submit' : <Loader />}
+          {!isLoading ? 'SignIn' : <Loader />}
         </Button>
       </form>
     </Form>
