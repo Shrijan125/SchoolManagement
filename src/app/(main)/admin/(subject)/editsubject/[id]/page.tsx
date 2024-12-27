@@ -51,13 +51,15 @@ const Page = ({ params }: { params: Promise<{ id: string }> }) => {
         }`}
       >
         {error ? (
-          <div className="text-red-500 font-semibold mt-4">
-            {error}
-          </div>
+          <div className="text-red-500 font-semibold mt-4">{error}</div>
         ) : (
           <div className="px-4 w-[600px] mx-auto">
-            {data?.category } {data?.name}
-            <AddSubjectForm defcategory={data?.category || ''} defname={data?.name || ""} update={updateId}></AddSubjectForm>
+            {data?.category} {data?.name}
+            <AddSubjectForm
+              defcategory={data?.category || ''}
+              defname={data?.name || ''}
+              update={updateId}
+            ></AddSubjectForm>
           </div>
         )}
       </div>

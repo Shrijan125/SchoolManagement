@@ -9,7 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { deleteSubject, getSubject } from '@/app/server-actions/subjects/subjects';
+import {
+  deleteSubject,
+  getSubject,
+} from '@/app/server-actions/subjects/subjects';
 import { Subject } from '@prisma/client';
 import ActionButton from '@/components/custom-buttons/action-button';
 import Loader from '@/components/loader';
@@ -21,7 +24,7 @@ const page = () => {
   const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [disabled, setDisabled] = useState<boolean>(false);
   const router = useRouter();
-  const {toast} = useToast();
+  const { toast } = useToast();
 
   useEffect(() => {
     setDataLoading(true);
@@ -36,24 +39,24 @@ const page = () => {
     });
   }, []);
 
-  const handleEdit = ({id}:{id:string}) => {
+  const handleEdit = ({ id }: { id: string }) => {
     setDisabled(true);
     router.push(`/admin/editsubject/${id}`);
     setDisabled(false);
   };
 
-  const handleDelete = async ({id}:{id:string}) => {
+  const handleDelete = async ({ id }: { id: string }) => {
     setDisabled(true);
-    const response = await deleteSubject({id});
-    if(response.error){
-      toast({description: response.error, variant: 'destructive'});
+    const response = await deleteSubject({ id });
+    if (response.error) {
+      toast({ description: response.error, variant: 'destructive' });
     }
-    if(response.success){
-      setData(data?.filter((item)=> item.id !== id));
-      toast({description: 'Subject Deleted'});
+    if (response.success) {
+      setData(data?.filter((item) => item.id !== id));
+      toast({ description: 'Subject Deleted' });
     }
     setDisabled(false);
-  }
+  };
 
   return (
     <div className="px-4">
@@ -95,8 +98,17 @@ const page = () => {
                 <TableCell className="text-left">{item.category}</TableCell>
                 <TableCell className="text-left">
                   <div className="flex justify-start gap-2">
-                    <ActionButton handleClick={handleEdit} disabled={disabled} id={item.id}  variant="edit" />
-                    <ActionButton handleClick={handleDelete} id={item.id}  disabled={disabled} />
+                    <ActionButton
+                      handleClick={handleEdit}
+                      disabled={disabled}
+                      id={item.id}
+                      variant="edit"
+                    />
+                    <ActionButton
+                      handleClick={handleDelete}
+                      id={item.id}
+                      disabled={disabled}
+                    />
                   </div>
                 </TableCell>
               </TableRow>

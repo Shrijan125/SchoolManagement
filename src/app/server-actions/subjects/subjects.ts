@@ -36,16 +36,15 @@ export async function getSubject() {
 }
 
 export async function getSubjectById({ id }: { id: string }) {
-    try {
-        const data = await prisma.subject.findFirst({where:{id:id}});
-        if(data===null)
-        {
-            return {error:'Subject not found'};
-        }
-        return {data:data};
-    } catch (error) {
-        return { error: 'Failed to fetch subjects' };
+  try {
+    const data = await prisma.subject.findFirst({ where: { id: id } });
+    if (data === null) {
+      return { error: 'Subject not found' };
     }
+    return { data: data };
+  } catch (error) {
+    return { error: 'Failed to fetch subjects' };
+  }
 }
 
 export async function updateSubject({
@@ -85,5 +84,20 @@ export async function deleteSubject({ id }: { id: string }) {
     return {
       error: 'Failed to delete Subject',
     };
+  }
+}
+
+export async function getSubjectbyCategory({
+  category,
+}: {
+  category: Category;
+}) {
+  try {
+    const data = await prisma.subject.findMany({
+      where: { category: category },
+    });
+    return { data: data };
+  } catch (error) {
+    return { error: 'Failed to fetch subjects' };
   }
 }

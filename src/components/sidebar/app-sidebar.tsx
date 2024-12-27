@@ -63,11 +63,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               onClick={() => console.log('clicked')}
             >
               <Image src={Logo} alt="Logo" width={50} height={50} />
-              <div className='flex flex-col font-bold tracking-wide'>
+              <div className="flex flex-col font-bold tracking-wide">
                 <span>DevAxis</span>
-              <span className="text-purple-200">Your Vision, Our Code</span>
+                <span className="text-purple-200">Your Vision, Our Code</span>
               </div>
-              
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

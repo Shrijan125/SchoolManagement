@@ -15,15 +15,14 @@ datasource db {
 
 
 model Teacher {
-  id         String   @id @default(uuid())
-  fullname   String
-  password   String
-  email      String   @unique
-  subjectId  String
-  grade      Grade[]
-  subject    Subject  @relation(fields: [subjectId], references: [id])
-  role       Role     @default(TEACHER)
+  id       String    @id @default(uuid())
+  fullname String
+  password String
+  email    String    @unique
+  role     Role      @default(TEACHER)
+  subjects Subject[] @relation("TeacherSubjects")
 }
+
 
 model Student {
   admno      String    @id
@@ -39,14 +38,14 @@ model Student {
 }
 
 model Subject {
-  id         String    @id @default(uuid())
-  name       String
-  category   Category
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        String    @id @default(uuid())
+  name      String
+  category  Category
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
-  teacher    Teacher[]
-  results    Result[]
+  teachers  Teacher[] @relation("TeacherSubjects")
+  results   Result[]
 }
 
 model Exam {
@@ -79,7 +78,7 @@ enum Role {
 enum Category {
   KIDS
   JUNIORS
-  SENIOR
+  SENIORS
 }
 
 enum Grade {

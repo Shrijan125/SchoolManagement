@@ -21,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { addSubject, updateSubject } from '@/app/server-actions/subjects/subjects';
+import {
+  addSubject,
+  updateSubject,
+} from '@/app/server-actions/subjects/subjects';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Category } from '@prisma/client';
@@ -31,13 +34,17 @@ const formSchema = z.object({
   category: z.string().min(1),
 });
 
-interface AddSubjectFormProps{
-    defname: string;
-    defcategory: string;
-    update?: string;
+interface AddSubjectFormProps {
+  defname: string;
+  defcategory: string;
+  update?: string;
 }
 
-const AddSubjectForm : React.FC<AddSubjectFormProps>= ({defname,defcategory,update}) => {
+const AddSubjectForm: React.FC<AddSubjectFormProps> = ({
+  defname,
+  defcategory,
+  update,
+}) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -45,7 +52,7 @@ const AddSubjectForm : React.FC<AddSubjectFormProps>= ({defname,defcategory,upda
       category: defcategory,
     },
   });
-  
+
   const isLoading = form.formState.isSubmitting;
   const { toast } = useToast();
   const router = useRouter();
@@ -57,16 +64,18 @@ const AddSubjectForm : React.FC<AddSubjectFormProps>= ({defname,defcategory,upda
     });
   }, [defname, defcategory, form]);
 
-
   async function onSubmit(value: z.infer<typeof formSchema>) {
-    const response = update !== undefined ? await updateSubject({
-        id: update!,
-        category: value.category as Category,
-        name: value.name,
-    }) : await addSubject({
-      category: value.category as Category,
-      name: value.name,
-    });
+    const response =
+      update !== undefined
+        ? await updateSubject({
+            id: update!,
+            category: value.category as Category,
+            name: value.name,
+          })
+        : await addSubject({
+            category: value.category as Category,
+            name: value.name,
+          });
     if (response?.error) {
       toast({ description: response.error, variant: 'destructive' });
       form.reset();
@@ -118,7 +127,15 @@ const AddSubjectForm : React.FC<AddSubjectFormProps>= ({defname,defcategory,upda
           )}
         />
         <Button type="submit" className="w-full p-6" disabled={isLoading}>
-          {!isLoading ? ( update !== undefined ? 'Update Subject' :  'Create Subject') : <Loader />}
+          {!isLoading ? (
+            update !== undefined ? (
+              'Update Subject'
+            ) : (
+              'Create Subject'
+            )
+          ) : (
+            <Loader />
+          )}
         </Button>
       </form>
     </Form>

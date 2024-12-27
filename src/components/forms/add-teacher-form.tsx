@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,14 +22,19 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import MultiSelect from '../multi-select';
+import { Grade, Role, Subject } from '@prisma/client';
+import { getSubject } from '@/app/server-actions/subjects/subjects';
+import { useToast } from '@/hooks/use-toast';
+import addTeacher from '@/app/server-actions/teachers/teachers';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   fullname: z.string().min(2).max(100),
   email: z.string().email(),
   password: z.string().min(6).max(100),
-  subject: z.string().min(2).max(100),
+  subject: z.array(z.string().min(2).max(100)).min(1),
   role: z.string().min(2).max(100),
-  grade: z.array(z.string().min(2).max(100)),
+  grade: z.array(z.string().min(1).max(100)).min(1),
 });
 
 const AddTeacherForm = () => {
@@ -38,14 +43,48 @@ const AddTeacherForm = () => {
     defaultValues: {
       email: '',
       password: '',
+      fullname: '',
+      subject: [],
+      role: '',
+      grade: [],
     },
   });
 
+  const [subject, setSubject] = useState<Subject[]>();
   const isLoading = form.formState.isSubmitting;
+  const { toast } = useToast();
+  const router = useRouter();
 
   async function onSubmit(value: z.infer<typeof formSchema>) {
-    console.log(value);
+    const response = await addTeacher({
+      fullname: value.fullname,
+      email: value.email,
+      password: value.password,
+      role: value.role as Role,
+      grades: value.grade as Grade[],
+      subjectIds: value.subject,
+    });
+
+    if (response.error) {
+      toast({ description: response.error, variant: 'destructive' });
+      form.reset();
+      return;
+    }
+
+    router.back();
   }
+
+  useEffect(() => {
+    getSubject().then((response) => {
+      if (response.data) {
+        setSubject(response.data);
+      }
+      if (response.error) {
+        toast({ description: response.error, variant: 'destructive' });
+      }
+    });
+  }, []);
+
   return (
     <Form {...form}>
       <form
@@ -91,6 +130,28 @@ const AddTeacherForm = () => {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="subject"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Subjects</FormLabel>
+              <FormControl>
+                <MultiSelect
+                  options={
+                    subject?.map((s) => ({ label: s.name, value: s.id })) || []
+                  }
+                  placeholder="Select Subjects"
+                  value={field.value || []}
+                  onChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="grade"
@@ -99,8 +160,13 @@ const AddTeacherForm = () => {
               <FormLabel>Grade</FormLabel>
               <FormControl>
                 <MultiSelect
-                  options={['Maths', 'Science', 'SST']}
-                  placeholder="Select Grades"
+                  options={
+                    Object.keys(Grade).map((key) => ({
+                      label: key,
+                      value: key,
+                    })) || []
+                  }
+                  placeholder="Select Grade"
                   value={field.value || []}
                   onChange={field.onChange}
                 />
@@ -111,47 +177,31 @@ const AddTeacherForm = () => {
         />
         <FormField
           control={form.control}
-          name="subject"
+          name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Subject</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <FormLabel>Role</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select Subjects for the teacher" />
+                    <SelectValue placeholder="Select a valid role for the teacher" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="m@example.com">m@example.com</SelectItem>
-                  <SelectItem value="m@google.com">m@google.com</SelectItem>
-                  <SelectItem value="m@support.com">m@support.com</SelectItem>
+                  {Object.keys(Role).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {Role[key as keyof typeof Role]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="subject"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subject</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role for the teacher" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="Teacher">Teacher</SelectItem>
-                  <SelectItem value="Admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </FormItem>
-          )}
-        />
+
         <Button type="submit" className="w-full p-6" disabled={isLoading}>
-          {!isLoading ? 'SignIn' : <Loader />}
+          {!isLoading ? 'Create Teacher' : <Loader />}
         </Button>
       </form>
     </Form>

@@ -11,7 +11,7 @@ const page = () => {
         Provide the relevant details.
       </span>
       <div className="mt-4">
-        <AddSubjectForm defcategory='' defname=''></AddSubjectForm>
+        <AddSubjectForm defcategory="" defname=""></AddSubjectForm>
       </div>
     </div>
   );

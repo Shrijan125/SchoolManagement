@@ -1,11 +1,16 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+interface MultiSelectOption {
+  label: string;
+  value: string;
+}
+
 interface MultiSelectProps {
-  options: string[];
+  options: MultiSelectOption[];
   placeholder?: string;
   value: string[];
   onChange: (selected: string[]) => void;
@@ -21,17 +26,16 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
-  const handleOptionToggle = (option: string) => {
-    if (value.includes(option)) {
-      onChange(value.filter((v) => v !== option));
+  const handleOptionToggle = (optionValue: string) => {
+    if (value.includes(optionValue)) {
+      onChange(value.filter((v) => v !== optionValue));
     } else {
-      onChange([...value, option]);
+      onChange([...value, optionValue]);
     }
   };
 
   return (
     <div className="relative w-full">
-      {/* Trigger */}
       <button
         type="button"
         onClick={toggleDropdown}
@@ -42,15 +46,17 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
       >
         <span>
           {value.length > 0 ? (
-            value.join(', ')
+            options
+              .filter((option) => value.includes(option.value))
+              .map((option) => option.label)
+              .join(', ')
           ) : (
-            <span className="text-muted">{placeholder}</span>
+            <span>{placeholder}</span>
           )}
         </span>
         <ChevronDown className="h-4 w-4" />
       </button>
 
-      {/* Dropdown */}
       {isOpen && (
         <div
           className={cn(
@@ -60,19 +66,16 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
         >
           {options.map((option) => (
             <label
-              key={option}
+              key={option.value}
               className="flex items-center p-2 cursor-pointer hover:bg-muted"
             >
               <input
                 type="checkbox"
-                checked={value.includes(option)}
-                onChange={() => handleOptionToggle(option)}
+                checked={value.includes(option.value)}
+                onChange={() => handleOptionToggle(option.value)}
                 className="mr-2"
               />
-              <span className="flex-1">{option}</span>
-              {value.includes(option) && (
-                <Check className="h-4 w-4 text-primary" />
-              )}
+              <span className="flex-1 select-none">{option.label}</span>
             </label>
           ))}
         </div>
