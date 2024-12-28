@@ -24,7 +24,7 @@ export default async function addTeacher({
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     await prisma.teacher.create({
       data: {
         fullname,
@@ -32,12 +32,12 @@ export default async function addTeacher({
         password: hashedPassword,
         role,
         subjects: {
-          connect: subjectIds.map(id => ({ id }))
-        }
+          connect: subjectIds.map((id) => ({ id })),
+        },
       },
       include: {
-        subjects: true // Include related subjects in the response if needed
-      }
+        subjects: true, // Include related subjects in the response if needed
+      },
     });
 
     return { success: 'Teacher added successfully' };

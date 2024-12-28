@@ -13,75 +13,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
-model Teacher {
-  id       String    @id @default(uuid())
-  fullname String
-  password String
-  email    String    @unique
-  role     Role      @default(TEACHER)
-  subjects Subject[] @relation("TeacherSubjects")
-}
-
-
-model Student {
-  admno      String    @id
-  fullname   String
-  serialno   String
-  grade      Grade
-  section    Section
-  category   Category
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  results    Result[]
-}
-
-model Subject {
-  id        String    @id @default(uuid())
-  name      String
-  category  Category
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  teachers  Teacher[] @relation("TeacherSubjects")
-  results   Result[]
-}
-
-model Exam {
-  id         String    @id @default(uuid())
-  name       String
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-
-  results    Result[]
-}
-
-model Result {
-  id         String    @id @default(uuid())
-  marks      Float
-  studentId  String
-  student    Student   @relation(fields: [studentId], references: [admno])
-  subjectId  String
-  subject    Subject   @relation(fields: [subjectId], references: [id])
-  examId     String
-  exam       Exam      @relation(fields: [examId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-}
-
-enum Role {
-  ADMIN
-  TEACHER
-}
-
-enum Category {
-  KIDS
-  JUNIORS
-  SENIORS
-}
-
-enum Grade {
+enum GradeName {
+  NUR
   KG1
   KG2
   I
@@ -94,11 +27,157 @@ enum Grade {
   VIII
   IX
   X
-  XI
-  XII
 }
 
-enum Section {
+enum CATEGORYNAME {
+  NURSERY
+  PRIMARY
+  SECONDARY
+}
+
+enum SECTION {
   A
   B
+}
+
+enum ROLE {
+  TEACHER
+  ADMIN
+}
+
+model Category {
+  id       String   @id @default(uuid())
+  name     CATEGORYNAME
+  grades   Grade[]
+  exams    Exam[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Grade {
+  id         String    @id @default(uuid())
+  name       GradeName
+  categoryID String
+  category   Category  @relation(fields: [categoryID], references: [id])
+  student    Student[]
+  teacher    Teacher[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Exam {
+  id          String      @id @default(uuid())
+  name        String
+  categoryID  String
+  totalMarks  String
+  category    Category    @relation(fields: [categoryID], references: [id])
+  nurresult   NurResult[]
+  priresult   PriResult[]
+  secresult   SecResult[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Session {
+  id         String      @id @default(uuid())
+  name       String      @unique
+  student    Student[]
+  nurresult  NurResult[]
+  priresult  PriResult[]
+  secresult  SecResult[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Student {
+  name       String
+  gradeID    String
+  rollNO     String     @id
+  Section    SECTION
+  serialNO   String
+  sessionID  String
+  session    Session    @relation(fields: [sessionID], references: [id])
+  grade      Grade      @relation(fields: [gradeID], references: [id])
+  nurresult  NurResult[]
+  priresult  PriResult[]
+  secresult  SecResult[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+
+model NurResult {
+  id             String    @id @default(uuid())
+  studentID      String
+  sessionID      String
+  examID         String
+  englishwritten Int       @default(-1)
+  englishoral    Int       @default(-1)
+  englishrhymes  Int       @default(-1)
+  hindiwritten   Int       @default(-1)
+  hindioral      Int       @default(-1)
+  hindirhymes    Int       @default(-1)
+  mathswritten   Int       @default(-1)
+  mathsoral      Int       @default(-1)
+  gs             Int       @default(-1)
+  activity       Int       @default(-1)
+  spelldict      Int       @default(-1)
+  drawing        Int       @default(-1)
+  pt             Int       @default(-1)
+  conversation   Int       @default(-1)
+  exam           Exam      @relation(fields: [examID], references: [id])
+  student        Student   @relation(fields: [studentID], references: [rollNO])
+  session        Session   @relation(fields: [sessionID], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model PriResult {
+  id         String    @id @default(uuid())
+  studentID  String
+  sessionID  String
+  examID     String
+  english    Int       @default(-1)
+  hindi      Int       @default(-1)
+  maths      Int       @default(-1)
+  science    Int       @default(-1)
+  sst        Int       @default(-1)
+  computer   Int       @default(-1)
+  gk         Int       @default(-1)
+  valueedu   Int       @default(-1)
+  sanskrit   Int       @default(-1)
+  exam       Exam      @relation(fields: [examID], references: [id])
+  student    Student   @relation(fields: [studentID], references: [rollNO])
+  session    Session   @relation(fields: [sessionID], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt @default(now())
+}
+
+model SecResult {
+  id         String    @id @default(uuid())
+  studentID  String
+  sessionID  String
+  examID     String
+  english    Int       @default(-1)
+  hindi      Int       @default(-1)
+  maths      Int       @default(-1)
+  science    Int       @default(-1)
+  sst        Int       @default(-1)
+  exam       Exam      @relation(fields: [examID], references: [id])
+  student    Student   @relation(fields: [studentID], references: [rollNO])
+  session    Session   @relation(fields: [sessionID], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt @default(now())
+}
+
+model Teacher {
+  id       String   @id @default(uuid())
+  fullname String
+  email    String   @unique
+  password String
+  gradeId  String?
+  role     ROLE
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  grade    Grade?   @relation(fields: [gradeId], references: [id])
 }

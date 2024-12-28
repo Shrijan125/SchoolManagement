@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { BookOpen, BookType, GraduationCap, Settings2 } from 'lucide-react';
+import { BookType, GraduationCap, Settings2, UserRound } from 'lucide-react';
 
 import Logo from '../../../public/logo_cropped.png';
 
@@ -39,9 +39,9 @@ const data = {
       icon: BookType,
     },
     {
-      title: 'Documentation',
-      url: '#',
-      icon: BookOpen,
+      title: 'Students',
+      url: '/admin/students',
+      icon: UserRound,
     },
     {
       title: 'Settings',
