@@ -1,5 +1,6 @@
 'use server';
 import { authOptions } from '@/lib/auth';
+import { firebaseAdmin } from '@/lib/firebase-admin';
 import { PrismaClient } from '@prisma/client';
 import admin from 'firebase-admin';
 import { getServerSession } from 'next-auth';
@@ -40,10 +41,14 @@ export async function markAttendance({
       },
     });
 
+    const today = new Date();
+    const formattedDate = `${today.getDate().toString().padStart(2, '0')}/${(today.getMonth() + 1).toString().padStart(2, '0')}/${today.getFullYear()}`;
+
+
     const notificatiionsRecords = studentDetails.map((student) => ({
       rollNO: student.rollNO,
       body: `Your ward ${student.name} is absent today. Please contact the school if not so.`,
-      title: `Absent ${new Date().toLocaleDateString}`,
+      title: `Absent ${formattedDate}`,
     }));
 
     await prisma.$transaction(async (prisma) => {
@@ -73,11 +78,10 @@ export async function markAttendance({
           token: student?.fcmToken,
         };
 
-        admin
+        firebaseAdmin
           .messaging()
           .send(payload)
           .then((_) => {
-
             console.log('Notification sent successfully:');
           })
           .catch((error) => {
