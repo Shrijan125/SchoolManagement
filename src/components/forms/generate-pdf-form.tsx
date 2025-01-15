@@ -21,7 +21,7 @@ import {
 import { GradeName, SECTION } from '@prisma/client';
 import { Button } from '../ui/button';
 import Loader from '../loader';
-import generateResultbyClass from '@/app/server-actions/results/route';
+import generateResultbyClass from '@/app/server-actions/results/results';
 import { useToast } from '@/hooks/use-toast';
 import RenderStudentPDFs from '../react-pdf';
 import { NurseryResultProps } from '../results/nursery-result';

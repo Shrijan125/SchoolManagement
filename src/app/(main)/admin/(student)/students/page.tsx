@@ -1,32 +1,18 @@
 'use client';
 import PlusIconButton from '@/components/custom-buttons/plus-icon-button';
-import React, { useEffect, useState } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  deleteSubject,
-  getSubject,
-} from '@/app/server-actions/subjects/subjects';
-import { Student } from '@prisma/client';
-import ActionButton from '@/components/custom-buttons/action-button';
-import Loader from '@/components/loader';
-import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+// import React, {useState } from 'react';
+// import { Student } from '@prisma/client';
+// import { useRouter } from 'next/navigation';
+// import { useToast } from '@/hooks/use-toast';
 
 const page = () => {
-  const [data, setData] = useState<Student[]>();
-  const [dataLoading, setDataLoading] = useState<boolean>(true);
-  const [disabled, setDisabled] = useState<boolean>(false);
-  const router = useRouter();
-  const { toast } = useToast();
+  // const [data, setData] = useState<Student[]>();
+  // const [dataLoading, setDataLoading] = useState<boolean>(true);
+  // const [disabled, setDisabled] = useState<boolean>(false);
+  // const router = useRouter();
+  // const { toast } = useToast();
 
-  //   useEffect(() => {
+  // //   useEffect(() => {
   //     setDataLoading(true);
   //     getSubject().then((response) => {
   //       if (response.data) {

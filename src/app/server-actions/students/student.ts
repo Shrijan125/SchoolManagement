@@ -32,16 +32,16 @@ export async function addStudent({
     if (!gradeId) {
       return { error: 'Grade not found' };
     }
-    await prisma.student.create({
-      data: {
-        name,
-        gradeID: gradeId?.id,
-        sessionID: process.env.NEXTSESSION_ID as string,
-        Section: section as SECTION,
-        serialNO: serialNO,
-        rollNO: rollNO,
-      },
-    });
+    // await prisma.student.create({
+    //   data: {
+    //     name,
+    //     gradeID: gradeId?.id,
+    //     sessionID: process.env.NEXTSESSION_ID as string,
+    //     Section: section as SECTION,
+    //     serialNO: serialNO,
+    //     rollNO: rollNO,
+    //   },
+    // });
     return { success: 'Student added successfully' };
   } catch (error) {
     return { error: 'Error while adding student' };
@@ -73,16 +73,16 @@ export async function addbulkStudent({
     if (!gradeId) {
       return { error: 'Grade not found' };
     }
-    await prisma.student.createMany({
-      data: students.map((student) => ({
-        name: student.name,
-        gradeID: gradeId?.id,
-        sessionID: process.env.NEXTSESSION_ID as string,
-        Section: section as SECTION,
-        serialNO: student.serialNO,
-        rollNO: student.rollNO,
-      })),
-    });
+    // await prisma.student.createMany({
+    //   data: students.map((student) => ({
+    //     name: student.name,
+    //     gradeID: gradeId?.id,
+    //     sessionID: process.env.NEXTSESSION_ID as string,
+    //     Section: section as SECTION,
+    //     serialNO: student.serialNO,
+    //     rollNO: student.rollNO,
+    //   })),
+    // });
     return { success: 'Students added successfully' };
   } catch (error) {
     return { error: 'Error while adding students' };

@@ -46,7 +46,7 @@ export async function markAttendance({
       title: `Absent ${new Date().toLocaleDateString}`,
     }));
 
-    const result = await prisma.$transaction(async (prisma) => {
+    await prisma.$transaction(async (prisma) => {
       await prisma.attendance.createMany({
         data: attendanceRecords,
       });
@@ -76,7 +76,8 @@ export async function markAttendance({
         admin
           .messaging()
           .send(payload)
-          .then((response) => {
+          .then((_) => {
+
             console.log('Notification sent successfully:');
           })
           .catch((error) => {
@@ -86,6 +87,7 @@ export async function markAttendance({
     });
     return { success: 'Attendance Marked successfully!' };
   } catch (error) {
+    console.log(error);
     return { error: 'Error while marking attendance' };
   }
 }

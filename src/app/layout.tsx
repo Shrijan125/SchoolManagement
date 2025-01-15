@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import NextSessionProvider from '@/providers/session-provider';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
+import serviceAccount from '../../avg-notifications-firebase-adminsdk-yw6xe-98449560d9.json';
 import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
@@ -30,9 +31,8 @@ export default async function RootLayout({
 }>) {
   const session = await getServerSession(authOptions);
   if (!admin.apps.length) {
-    const serviceAccount = require('../../avg-notifications-firebase-adminsdk-yw6xe-98449560d9.json');
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+      credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
     });
   }
   return (
