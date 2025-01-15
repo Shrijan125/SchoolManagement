@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import admin from 'firebase-admin';
 import { ThemeProvider } from '@/components/theme-provider';
 import NextSessionProvider from '@/providers/session-provider';
 import { getServerSession } from 'next-auth';
@@ -28,6 +29,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  if (!admin.apps.length) {
+    const serviceAccount = require('../../avg-notifications-firebase-adminsdk-yw6xe-98449560d9.json');
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  }
   return (
     <html lang="en" suppressHydrationWarning>
       <body

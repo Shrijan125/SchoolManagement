@@ -40,6 +40,11 @@ enum SECTION {
   B
 }
 
+enum GENDER {
+  M
+  F
+}
+
 enum ROLE {
   TEACHER
   ADMIN
@@ -61,6 +66,7 @@ model Grade {
   category   Category  @relation(fields: [categoryID], references: [id])
   student    Student[]
   teacher    Teacher[]
+  assignment Assignment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 }
@@ -85,6 +91,7 @@ model Session {
   nurresult  NurResult[]
   priresult  PriResult[]
   secresult  SecResult[]
+  assignment Assignment[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 }
@@ -95,12 +102,25 @@ model Student {
   rollNO     String     @id
   Section    SECTION
   serialNO   String
+  dob        DateTime
+  fathersName String 
+  mothersName String  
+  phone       String
+  alternatePhone String
+  address      String
+  refrehToken String?
+  fcmToken     String?
+  gender      GENDER
+  aadhar      String?
+  bloodGroup  String?
   sessionID  String
   session    Session    @relation(fields: [sessionID], references: [id])
   grade      Grade      @relation(fields: [gradeID], references: [id])
   nurresult  NurResult[]
   priresult  PriResult[]
   secresult  SecResult[]
+  attendance Attendance[]
+  notifications Notifications[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 }
@@ -175,9 +195,41 @@ model Teacher {
   fullname String
   email    String   @unique
   password String
-  gradeId  String?
+  gradeId  String
+  section  SECTION
+  allowed  Boolean  @default(false)
   role     ROLE
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
-  grade    Grade?   @relation(fields: [gradeId], references: [id])
+  grade    Grade   @relation(fields: [gradeId], references: [id])
+}
+
+model Assignment{
+  id String @id @default(uuid())
+  gradeId String
+  subject String
+  section SECTION
+  assignment String
+  sessionID String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+  session Session @relation(fields: [sessionID], references: [id])
+  grade Grade @relation(fields: [gradeId], references: [id])
+}
+
+model Notifications{
+  id String @id @default(uuid())
+  rollNO String
+  title String
+  body String
+  student Student @relation(fields: [rollNO], references: [rollNO])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model Attendance{
+  id String @id @default(uuid())
+  rollNO String
+  date DateTime @default(now())
+  student Student @relation(fields: [rollNO], references: [rollNO])
 }

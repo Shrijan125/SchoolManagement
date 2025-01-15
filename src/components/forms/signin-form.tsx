@@ -14,6 +14,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import Loader from '../loader';
+import { signIn } from 'next-auth/react';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -30,9 +33,28 @@ const SignInForm = () => {
   });
 
   const isLoading = form.formState.isSubmitting;
+  const { toast } = useToast();
+  const router = useRouter();
 
   async function onSubmit(value: z.infer<typeof formSchema>) {
-    console.log(value);
+    try {
+      const result = await signIn('credentials', {
+        email: value.email,
+        password: value.password,
+        redirect: false,
+      });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      router.replace('/admin');
+    } catch (error) {
+      if (error instanceof Error) {
+        toast({ description: error.message, variant: 'destructive' });
+        return;
+      }
+      toast({ description: 'An error occurred', variant: 'destructive' });
+      form.reset();
+    }
   }
   return (
     <Form {...form}>

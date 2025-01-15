@@ -1,51 +1,56 @@
 'use server';
 import bcrypt from 'bcrypt';
 import prisma from '@/db';
-import { Grade, Role } from '@prisma/client';
+import { GradeName, ROLE, SECTION } from '@prisma/client';
 
 export default async function addTeacher({
   fullname,
   email,
   password,
   role,
-  grades,
-  subjectIds,
+  grade,
+  section,
 }: {
   fullname: string;
   email: string;
   password: string;
-  role: Role;
-  grades: Grade[];
-  subjectIds: string[];
+  role: string;
+  grade: string;
+  section: string;
 }) {
-  if (!fullname || !email || !password || !role || !subjectIds) {
+  if (!fullname || !email || !password || !role || !grade || !section) {
     return { error: 'Please fill all the fields' };
   }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    const gradeId = await prisma.grade.findFirst({
+      where: {
+        name: grade as GradeName,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!gradeId) {
+      return { error: 'Grade not found' };
+    }
+
     await prisma.teacher.create({
       data: {
         fullname,
         email,
         password: hashedPassword,
-        role,
-        subjects: {
-          connect: subjectIds.map((id) => ({ id })),
-        },
-      },
-      include: {
-        subjects: true, // Include related subjects in the response if needed
+        role: role as ROLE,
+        gradeId: gradeId?.id,
+        section: section as SECTION,
       },
     });
 
     return { success: 'Teacher added successfully' };
   } catch (error) {
-    console.error('Error creating teacher:', error);
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
     return { error: 'Error while adding teacher.' };
   }
 }

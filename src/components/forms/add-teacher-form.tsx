@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,9 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import MultiSelect from '../multi-select';
-import { Grade, Role, Subject } from '@prisma/client';
-import { getSubject } from '@/app/server-actions/subjects/subjects';
+import { GradeName, ROLE, SECTION } from '@prisma/client';
 import { useToast } from '@/hooks/use-toast';
 import addTeacher from '@/app/server-actions/teachers/teachers';
 import { useRouter } from 'next/navigation';
@@ -32,9 +30,9 @@ const formSchema = z.object({
   fullname: z.string().min(2).max(100),
   email: z.string().email(),
   password: z.string().min(6).max(100),
-  subject: z.array(z.string().min(2).max(100)).min(1),
   role: z.string().min(2).max(100),
-  grade: z.array(z.string().min(1).max(100)).min(1),
+  grade: z.string().min(1).max(100),
+  section: z.string().min(1).max(100),
 });
 
 const AddTeacherForm = () => {
@@ -44,46 +42,34 @@ const AddTeacherForm = () => {
       email: '',
       password: '',
       fullname: '',
-      subject: [],
       role: '',
-      grade: [],
+      grade: '',
+      section: '',
     },
   });
 
-  const [subject, setSubject] = useState<Subject[]>();
   const isLoading = form.formState.isSubmitting;
   const { toast } = useToast();
   const router = useRouter();
 
   async function onSubmit(value: z.infer<typeof formSchema>) {
+    console.log(value);
     const response = await addTeacher({
       fullname: value.fullname,
       email: value.email,
       password: value.password,
-      role: value.role as Role,
-      grades: value.grade as Grade[],
-      subjectIds: value.subject,
+      role: value.role,
+      grade: value.grade,
+      section: value.section,
     });
-
     if (response.error) {
       toast({ description: response.error, variant: 'destructive' });
-      form.reset();
+      // form.reset();
       return;
     }
 
     router.back();
   }
-
-  useEffect(() => {
-    getSubject().then((response) => {
-      if (response.data) {
-        setSubject(response.data);
-      }
-      if (response.error) {
-        toast({ description: response.error, variant: 'destructive' });
-      }
-    });
-  }, []);
 
   return (
     <Form {...form}>
@@ -130,47 +116,58 @@ const AddTeacherForm = () => {
             </FormItem>
           )}
         />
-
-        <FormField
-          control={form.control}
-          name="subject"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Subjects</FormLabel>
-              <FormControl>
-                <MultiSelect
-                  options={
-                    subject?.map((s) => ({ label: s.name, value: s.id })) || []
-                  }
-                  placeholder="Select Subjects"
-                  value={field.value || []}
-                  onChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="grade"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Grade</FormLabel>
-              <FormControl>
-                <MultiSelect
-                  options={
-                    Object.keys(Grade).map((key) => ({
-                      label: key,
-                      value: key,
-                    })) || []
-                  }
-                  placeholder="Select Grade"
-                  value={field.value || []}
-                  onChange={field.onChange}
-                />
-              </FormControl>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Grade" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.values(GradeName).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {GradeName[key as keyof typeof GradeName]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="section"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Section</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Section" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.values(SECTION).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {SECTION[key as keyof typeof SECTION]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -188,9 +185,9 @@ const AddTeacherForm = () => {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {Object.keys(Role).map((key) => (
+                  {Object.keys(ROLE).map((key) => (
                     <SelectItem key={key} value={key}>
-                      {Role[key as keyof typeof Role]}
+                      {ROLE[key as keyof typeof ROLE]}
                     </SelectItem>
                   ))}
                 </SelectContent>

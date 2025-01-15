@@ -1,0 +1,13 @@
+-- CreateEnum
+CREATE TYPE "GENDER" AS ENUM ('M', 'F');
+
+-- AlterTable
+ALTER TABLE "Student" ADD COLUMN     "aadhar" TEXT,
+ADD COLUMN     "address" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "alternatePhone" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "bloodGroup" TEXT,
+ADD COLUMN     "dob" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "fathersName" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "gender" "GENDER" NOT NULL DEFAULT 'M',
+ADD COLUMN     "mothersName" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "phone" TEXT NOT NULL DEFAULT '';

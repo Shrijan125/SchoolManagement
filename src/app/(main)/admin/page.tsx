@@ -5,10 +5,13 @@ const page = () => {
   return (
     <>
       <CustomSidebarTrigger
-        link1="/admin"
-        title1="Admin"
-        title2="teachers"
+        link1=""
+        title1=""
+        title2="Admin"
       ></CustomSidebarTrigger>
+      <div className="mx-auto text-purple-300 text-center">
+        This page is under maintainenace!
+      </div>
     </>
   );
 };
