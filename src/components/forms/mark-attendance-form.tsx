@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GradeName, SECTION } from '@prisma/client';
 import { Button } from '../ui/button';
-import { Check, ChevronsUpDown, Loader } from 'lucide-react';
+import { Check, ChevronsUpDown} from 'lucide-react';
 import { getStudentbySection } from '@/app/server-actions/students/student';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { markAttendance } from '@/app/server-actions/attendance/attendance';
+import Loader from '../loader';
 
 const markAttendanceFormSchema = z.object({
   grade: z.string().min(1, 'Grade is required'),
