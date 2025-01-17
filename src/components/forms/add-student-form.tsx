@@ -1,6 +1,6 @@
 'use client';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { GradeName, SECTION } from '@prisma/client';
+import { GENDER, GradeName, SECTION } from '@prisma/client';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -25,19 +25,15 @@ import Loader from '../loader';
 import { addStudent } from '@/app/server-actions/students/student';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-
-const studentFormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  grade: z.string().min(1, 'Grade is required'),
-  rollNO: z.string().min(1, 'Roll number is required'),
-  section: z.string().min(1, 'Section is required'),
-  serialNO: z.string().min(1, 'Serial number is required'),
-});
+import {
+  studentFormSchema,
+  StudentFormSchema,
+} from '@/lib/schemas/add-student-form-schema';
 
 const AddStudentForm = () => {
   const { toast } = useToast();
   const router = useRouter();
-  const form = useForm<z.infer<typeof studentFormSchema>>({
+  const form = useForm<StudentFormSchema>({
     resolver: zodResolver(studentFormSchema),
     defaultValues: {
       name: '',
@@ -45,17 +41,20 @@ const AddStudentForm = () => {
       rollNO: '',
       section: '',
       serialNO: '',
+      dob: '',
+      fathersName: '',
+      mothersName: '',
+      phone: '',
+      alternatePhone: '',
+      address: '',
+      gender: '',
+      aadhar: '',
+      bloodGroup: '',
     },
   });
 
   async function onSubmit(value: z.infer<typeof studentFormSchema>) {
-    const response = await addStudent({
-      name: value.name,
-      grade: value.grade,
-      rollNO: value.rollNO,
-      section: value.section,
-      serialNO: value.serialNO,
-    });
+    const response = await addStudent(value);
 
     if (response.error) {
       toast({ description: response.error, variant: 'destructive' });
@@ -63,6 +62,7 @@ const AddStudentForm = () => {
     }
 
     if (response.success) {
+      toast({ description: 'Student added successfully' });
       router.back();
     }
   }
@@ -138,12 +138,49 @@ const AddStudentForm = () => {
         />
         <FormField
           control={form.control}
+          name="gender"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gender</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Gender" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {Object.values(GENDER).map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {GENDER[key as keyof typeof GENDER]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="bloodGroup"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Blood Group</FormLabel>
+              <FormControl>
+                <Input placeholder="Blood Group" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="serialNO"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Serial Number</FormLabel>
+              <FormLabel>Roll Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="Serial No" {...field} />
+                <Input type="number" placeholder="Roll No" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -154,9 +191,100 @@ const AddStudentForm = () => {
           name="rollNO"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Roll Number</FormLabel>
+              <FormLabel>Admission Number</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="Roll No" {...field} />
+                <Input type="number" placeholder="Admission No" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="dob"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>DOB</FormLabel>
+              <FormControl>
+                <Input placeholder="dd-mm-yyyy" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="fathersName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Father's Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Father's Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="mothersName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Mother's Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Mother's Name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="phone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Phone</FormLabel>
+              <FormControl>
+                <Input placeholder="Phone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="alternatePhone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Alternate Phone</FormLabel>
+              <FormControl>
+                <Input placeholder="Alternate Phone" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="Address" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="aadhar"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Aadhar</FormLabel>
+              <FormControl>
+                <Input placeholder="Aadhar" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

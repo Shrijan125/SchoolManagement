@@ -106,7 +106,7 @@ model Student {
   fathersName String 
   mothersName String  
   phone       String
-  alternatePhone String
+  alternatePhone String?
   address      String
   refrehToken String?
   fcmToken     String?
@@ -146,7 +146,7 @@ model NurResult {
   pt             Int       @default(-1)
   conversation   Int       @default(-1)
   exam           Exam      @relation(fields: [examID], references: [id])
-  student        Student   @relation(fields: [studentID], references: [rollNO])
+  student        Student   @relation(fields: [studentID], references: [rollNO], onDelete: Cascade)
   session        Session   @relation(fields: [sessionID], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
@@ -167,7 +167,7 @@ model PriResult {
   valueedu   Int       @default(-1)
   sanskrit   Int       @default(-1)
   exam       Exam      @relation(fields: [examID], references: [id])
-  student    Student   @relation(fields: [studentID], references: [rollNO])
+  student    Student   @relation(fields: [studentID], references: [rollNO], onDelete: Cascade)
   session    Session   @relation(fields: [sessionID], references: [id])
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt @default(now())
@@ -184,7 +184,7 @@ model SecResult {
   science    Int       @default(-1)
   sst        Int       @default(-1)
   exam       Exam      @relation(fields: [examID], references: [id])
-  student    Student   @relation(fields: [studentID], references: [rollNO])
+  student    Student   @relation(fields: [studentID], references: [rollNO], onDelete: Cascade)
   session    Session   @relation(fields: [sessionID], references: [id])
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt @default(now())
@@ -222,7 +222,7 @@ model Notifications{
   rollNO String
   title String
   body String
-  student Student @relation(fields: [rollNO], references: [rollNO])
+  student Student @relation(fields: [rollNO], references: [rollNO], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt @default(now())
 }
@@ -231,5 +231,5 @@ model Attendance{
   id String @id @default(uuid())
   rollNO String
   date DateTime @default(now())
-  student Student @relation(fields: [rollNO], references: [rollNO])
+  student Student @relation(fields: [rollNO], references: [rollNO], onDelete: Cascade)
 }

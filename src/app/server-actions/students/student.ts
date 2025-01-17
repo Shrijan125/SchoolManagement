@@ -1,47 +1,89 @@
 'use server';
 
-import { StudentData } from '@/components/forms/bulk-student-form';
 import prisma from '@/db';
-import { GradeName, SECTION } from '@prisma/client';
+import { authOptions } from '@/lib/auth';
+import {
+  studentFormSchema,
+  StudentFormSchema,
+} from '@/lib/schemas/add-student-form-schema';
+import { BulkStudentFormSchema } from '@/lib/schemas/bulk-student-upload';
+import { CATEGORYNAME, GENDER, GradeName, SECTION } from '@prisma/client';
+import { getServerSession } from 'next-auth';
 
-export async function addStudent({
-  name,
-  grade,
-  section,
-  serialNO,
-  rollNO,
-}: {
-  name: string;
-  grade: string;
-  section: string;
-  serialNO: string;
-  rollNO: string;
-}) {
-  if (!name || !grade || !section || !serialNO || !rollNO) {
-    return { error: 'All fields are required' };
+export async function addStudent(input: StudentFormSchema) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session?.user) return { error: 'Unauthorised!' };
+  const validationResult = studentFormSchema.safeParse(input);
+
+  if (!validationResult.success) {
+    return { error: 'Invalid input data' };
   }
+  const {
+    name,
+    grade,
+    section,
+    serialNO,
+    rollNO,
+    fathersName,
+    mothersName,
+    bloodGroup,
+    gender,
+    aadhar,
+    phone,
+    alternatePhone,
+    address,
+    dob,
+  } = validationResult.data;
   try {
+    const [day, month, year] = dob.split('-');
+    const dobDate = new Date(`${year}-${Number(month) - 1}-${day}`);
+    if (isNaN(dobDate.getTime())) {
+      return { error: 'Invalid date of birth' };
+    }
     const gradeId = await prisma.grade.findFirst({
       where: {
         name: grade as GradeName,
       },
       select: {
         id: true,
+        category: true,
       },
     });
     if (!gradeId) {
       return { error: 'Grade not found' };
     }
-    // await prisma.student.create({
-    //   data: {
-    //     name,
-    //     gradeID: gradeId?.id,
-    //     sessionID: process.env.NEXTSESSION_ID as string,
-    //     Section: section as SECTION,
-    //     serialNO: serialNO,
-    //     rollNO: rollNO,
-    //   },
-    // });
+
+    const isInNursery = gradeId.category.name === CATEGORYNAME.NURSERY;
+
+    const student = await prisma.student.findFirst({
+      where: {
+        rollNO: isInNursery ? rollNO + 'NUR' : rollNO,
+      },
+    });
+
+    if (student) {
+      return { error: 'Student already exists' };
+    }
+
+    await prisma.student.create({
+      data: {
+        name,
+        gradeID: gradeId?.id,
+        sessionID: process.env.NEXTSESSION_ID as string,
+        Section: section as SECTION,
+        serialNO: serialNO,
+        rollNO: isInNursery ? rollNO + 'NUR' : rollNO,
+        fathersName,
+        mothersName,
+        bloodGroup,
+        address,
+        dob: dobDate,
+        alternatePhone,
+        phone,
+        gender: gender as GENDER,
+        aadhar,
+      },
+    });
     return { success: 'Student added successfully' };
   } catch (error) {
     return { error: 'Error while adding student' };
@@ -55,12 +97,12 @@ export async function addbulkStudent({
 }: {
   grade: string;
   section: string;
-  students: StudentData[];
+  students: BulkStudentFormSchema[];
 }) {
   if (!grade || !section || !students || students.length === 0) {
     return { error: 'All fields are required' };
   }
-  console.log(grade, section, students);
+
   try {
     const gradeId = await prisma.grade.findFirst({
       where: {
@@ -68,23 +110,84 @@ export async function addbulkStudent({
       },
       select: {
         id: true,
+        category: true,
       },
     });
+
     if (!gradeId) {
-      return { error: 'Grade not found' };
+      return { error: 'Grade not found!' };
     }
-    // await prisma.student.createMany({
-    //   data: students.map((student) => ({
-    //     name: student.name,
-    //     gradeID: gradeId?.id,
-    //     sessionID: process.env.NEXTSESSION_ID as string,
-    //     Section: section as SECTION,
-    //     serialNO: student.serialNO,
-    //     rollNO: student.rollNO,
-    //   })),
-    // });
-    return { success: 'Students added successfully' };
+
+    const isInNursery = gradeId.category.name === CATEGORYNAME.NURSERY;
+    const rollNumbers = students.map((s) =>
+      isInNursery ? s.rollNO + 'NUR' : s.rollNO,
+    );
+    const duplicatesInUpload = rollNumbers.filter(
+      (num, index) => rollNumbers.indexOf(num) !== index,
+    );
+
+    if (duplicatesInUpload.length > 0) {
+      return {
+        error: `Duplicate roll numbers found in upload: ${duplicatesInUpload.join(', ')}`,
+      };
+    }
+
+    const existingStudents = await prisma.student.findMany({
+      where: {
+        rollNO: {
+          in: rollNumbers,
+        },
+        sessionID: process.env.NEXTSESSION_ID as string,
+      },
+      select: {
+        rollNO: true,
+      },
+    });
+
+    if (existingStudents.length > 0) {
+      const existingRollNos = existingStudents.map((s) => s.rollNO);
+      return {
+        error: `Following roll numbers already exist: ${existingRollNos.join(', ')}`,
+      };
+    }
+
+    const mappedData = students.map((student) => {
+      const [day, month, year] = student.dob.split('-');
+      const dobDate = new Date(`${year}-${Number(month)}-${day}`);
+
+      return {
+        rollNO: isInNursery ? student.rollNO + 'NUR' : student.rollNO,
+        name: student.name,
+        fathersName: student.fathersName,
+        mothersName: student.mothersName,
+        address: student.address,
+        aadhar: student.aadhar,
+        dob: dobDate,
+        gender: student.gender as GENDER,
+        phone: student.phone,
+        alternatePhone: student.alternatePhone,
+        bloodGroup: student.bloodGroup,
+        serialNO: student.serialNO,
+        gradeID: gradeId.id,
+        Section: section as SECTION,
+        sessionID: process.env.NEXTSESSION_ID as string,
+      };
+    });
+
+    await prisma.$transaction(async (tx) => {
+      await tx.student.createMany({
+        data: mappedData,
+      });
+    });
+
+    return { success: 'Students uploaded successfully!' };
   } catch (error) {
+    if (error instanceof Error) {
+      if (error.message.includes('Unique constraint')) {
+        return { error: 'Duplicate roll numbers found' };
+      }
+      return { error: error.message };
+    }
     return { error: 'Error while adding students' };
   }
 }
@@ -115,11 +218,6 @@ export async function getStudentbySection({
       where: {
         gradeID: gradeId?.id,
         Section: section as SECTION,
-      },
-      select: {
-        name: true,
-        serialNO: true,
-        rollNO: true,
       },
     });
     return { students };

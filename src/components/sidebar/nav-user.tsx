@@ -75,7 +75,7 @@ export function NavUser({
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleClick}>
-              <LogOut color='#fca5a5' />
+              <LogOut color="#fca5a5" />
               <span className="text-red-300">Logout</span>
             </DropdownMenuItem>
           </DropdownMenuContent>

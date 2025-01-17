@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { CalendarCheckIcon, ClipboardList } from 'lucide-react';
+import { CalendarCheckIcon, ClipboardList, UserRound } from 'lucide-react';
 
 import Logo from '../../../public/logo_cropped.png';
 
@@ -39,11 +39,11 @@ const data = {
     //   url: '/admin/subjects',
     //   icon: BookType,
     // },
-    // {
-    //   title: 'Students',
-    //   url: '/admin/students',
-    //   icon: UserRound,
-    // },
+    {
+      title: 'Students',
+      url: '/admin/students',
+      icon: UserRound,
+    },
     // {
     //   title: 'Results',
     //   url: '/admin/generateresult',
