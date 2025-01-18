@@ -22,11 +22,6 @@ import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 const data = {
-  user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
   navMain: [
     // {
     //   title: 'Teachers',
@@ -72,7 +67,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton
               className="h-full"
-              onClick={() => console.log('clicked')}
             >
               <Image src={Logo} alt="Logo" width={50} height={50} />
               <div className="flex flex-col font-bold tracking-wide">

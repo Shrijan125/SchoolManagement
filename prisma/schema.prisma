@@ -102,7 +102,7 @@ model Student {
   rollNO     String     @id
   Section    SECTION
   serialNO   String
-  dob        DateTime
+  dob        DateTime?
   fathersName String 
   mothersName String  
   phone       String

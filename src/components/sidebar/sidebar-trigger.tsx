@@ -7,14 +7,14 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { SidebarTrigger, SidebarInset } from '@/components/ui/sidebar';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 
 import { Separator } from '@/components/ui/separator';
 
 interface CustomSidebarTriggerProps {
   title1: string;
   link1: string;
-  title2: string;
+  title2?: string;
 }
 
 const CustomSidebarTrigger: React.FC<CustomSidebarTriggerProps> = ({
@@ -32,10 +32,14 @@ const CustomSidebarTrigger: React.FC<CustomSidebarTriggerProps> = ({
             <BreadcrumbItem className="hidden md:block">
               <BreadcrumbLink href={link1}>{title1}</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{title2}</BreadcrumbPage>
-            </BreadcrumbItem>
+            {title2 && (
+              <>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{title2}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
           </BreadcrumbList>
         </Breadcrumb>
       </div>

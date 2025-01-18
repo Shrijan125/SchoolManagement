@@ -20,7 +20,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GradeName, SECTION } from '@prisma/client';
 import { Button } from '../ui/button';
-import { Loader, Plus, X } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '../ui/input';
 import { createAssignment } from '@/app/server-actions/assignment/assignment';
@@ -28,6 +28,7 @@ import {
   createAssignmentFormSchema,
   CreateAssignmentSchema,
 } from '@/lib/schemas/assignment-schema';
+import Loader from '../loader';
 
 const CreateAssignmentForm = () => {
   const { toast } = useToast();

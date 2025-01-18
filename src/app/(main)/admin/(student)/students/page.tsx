@@ -66,7 +66,8 @@ const page = () => {
             const numA = parseInt(a.serialNO) || 0;
             const numB = parseInt(b.serialNO) || 0;
             return numA - numB;
-          });          setStudents(sortedStudents);
+          });
+          setStudents(sortedStudents);
         }
         setDataLoading(false);
       }
@@ -128,7 +129,9 @@ const page = () => {
               <TableCell className="text-left">{item.serialNO}</TableCell>
               <TableCell className="text-left">{item.name}</TableCell>
               <TableCell className="text-left">{item.rollNO}</TableCell>
-              <TableCell className="text-left">{item.dob.toLocaleDateString()}</TableCell>
+              <TableCell className="text-left">
+                {item.dob && item.dob.toLocaleDateString()}
+              </TableCell>
               <TableCell className="text-left">{item.fathersName}</TableCell>
               <TableCell className="text-left">{item.mothersName}</TableCell>
               <TableCell className="text-left">{item.phone}</TableCell>
@@ -159,10 +162,13 @@ const page = () => {
         </h1>
         <div className="gap-4 flex">
           <PlusIconButton href="/admin/addstudent" title="Add Student" />
-          <PlusIconButton href="/admin/bulkstudentupload" title="Add Bulk Student" />
+          <PlusIconButton
+            href="/admin/bulkstudentupload"
+            title="Add Bulk Student"
+          />
         </div>
       </div>
-      
+
       <div className="mt-6 flex gap-4">
         <div className="w-[400px]">
           <Select
@@ -202,12 +208,9 @@ const page = () => {
         </div>
       </div>
 
-      <div className="mt-6">
-        {renderContent()}
-      </div>
+      <div className="mt-6">{renderContent()}</div>
     </div>
   );
-
 };
 
 export default page;

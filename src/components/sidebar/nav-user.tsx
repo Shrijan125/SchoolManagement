@@ -1,9 +1,10 @@
-import { ChevronsUpDown, LogOut } from 'lucide-react';
+import { BadgeCheck, ChevronsUpDown, LockOpen, LogOut } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -16,6 +17,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 
 export function NavUser({
   name,
@@ -72,6 +74,15 @@ export function NavUser({
                 </div>
               </div>
             </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <Link href={'/admin/resetpassword'}>
+                <DropdownMenuItem>
+                  <LockOpen></LockOpen>
+                  Reset Password
+                </DropdownMenuItem>
+              </Link>
+            </DropdownMenuGroup>
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleClick}>

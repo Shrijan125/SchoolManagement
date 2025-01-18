@@ -51,10 +51,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json('Student Not found!', { status: 400 });
     }
 
-    const formattedDate = student.dob
-      .toISOString()
-      .split('T')[0]
-      .replace(/-/g, '');
+    const formattedDate = (student.dob ? new Date(student.dob) : new Date())
+    .toISOString()
+    .split('T')[0]
+    .replace(/-/g, '');
 
     if (formattedDate !== password) {
       return NextResponse.json('Invalid Credentials!', { status: 400 });

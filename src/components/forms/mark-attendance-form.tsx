@@ -20,7 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GradeName, SECTION } from '@prisma/client';
 import { Button } from '../ui/button';
-import { Check, ChevronsUpDown} from 'lucide-react';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { getStudentbySection } from '@/app/server-actions/students/student';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -79,10 +79,20 @@ const MarkAttendanceForm = () => {
         }
         if (data.students) {
           setFramework(
-            data.students.map((student) => ({
-              value: student.rollNO,
-              label: student.serialNO + ' - ' + student.name,
-            })),
+            data.students
+              .sort((a, b) => {
+                const serialA = parseInt(a.serialNO);
+                const serialB = parseInt(b.serialNO);
+                
+                if (isNaN(serialA)) return 1;
+                if (isNaN(serialB)) return -1;
+                
+                return serialA - serialB;
+              })
+              .map((student) => ({
+                value: student.rollNO,
+                label: student.serialNO + ' - ' + student.name,
+              }))
           );
         }
         setIsFetchingStudents(false);

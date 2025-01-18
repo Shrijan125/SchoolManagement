@@ -150,12 +150,15 @@ const BulkStudentForm = () => {
         students: data,
       });
       if (response.error) {
-        toast({ description: response.error, variant: 'destructive' });
-        form.reset({
-          grade: '',
-          section: '',
-          file: undefined,
+        toast({
+          description: 'Failed to upload Student',
+          variant: 'destructive',
         });
+        // form.reset({
+        //   grade: '',
+        //   section: '',
+        //   file: undefined,
+        // });
         return;
       }
       if (response.success) {
@@ -264,7 +267,7 @@ const BulkStudentForm = () => {
             )}
           />
           <Button type="submit" className="w-full p-6" disabled={isLoading}>
-            {!isLoading ? 'Create Student' : <Loader />}
+            {!isLoading ? 'Upload Students' : <Loader />}
           </Button>
         </form>
       </Form>

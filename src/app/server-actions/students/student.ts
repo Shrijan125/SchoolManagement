@@ -99,6 +99,8 @@ export async function addbulkStudent({
   section: string;
   students: BulkStudentFormSchema[];
 }) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session?.user) return { error: 'Unauthorised!' };
   if (!grade || !section || !students || students.length === 0) {
     return { error: 'All fields are required' };
   }
@@ -152,17 +154,24 @@ export async function addbulkStudent({
     }
 
     const mappedData = students.map((student) => {
-      const [day, month, year] = student.dob.split('-');
-      const dobDate = new Date(`${year}-${Number(month)}-${day}`);
+      let dobDate: Date | null = null;
 
-      return {
+      if (
+        student.dob !== undefined &&
+        student.dob !== null &&
+        student.dob !== ''
+      ) {
+        const [day, month, year] = student!.dob!.split('-');
+        dobDate = new Date(`${year}-${Number(month)}-${day}`);
+      }
+
+      const studentData = {
         rollNO: isInNursery ? student.rollNO + 'NUR' : student.rollNO,
         name: student.name,
         fathersName: student.fathersName,
         mothersName: student.mothersName,
         address: student.address,
         aadhar: student.aadhar,
-        dob: dobDate,
         gender: student.gender as GENDER,
         phone: student.phone,
         alternatePhone: student.alternatePhone,
@@ -172,6 +181,28 @@ export async function addbulkStudent({
         Section: section as SECTION,
         sessionID: process.env.NEXTSESSION_ID as string,
       };
+      if (student.dob && student.dob !== '' && student.dob !== 'undefined') {
+        try {
+          const [day, month, year] = student.dob.split('-');
+          if (day && month && year) {
+            const dobDate = new Date(
+              Date.UTC(Number(year), Number(month) - 1, Number(day)),
+            );
+            if (!isNaN(dobDate.getTime())) {
+              return {
+                ...studentData,
+                dob: dobDate,
+              };
+            }
+          }
+        } catch (error) {
+          console.error(
+            `Error parsing date for student ${student.rollNO}:`,
+            error,
+          );
+        }
+      }
+      return studentData;
     });
 
     await prisma.$transaction(async (tx) => {
@@ -199,6 +230,8 @@ export async function getStudentbySection({
   grade: string;
   section: string;
 }) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session?.user) return { error: 'Unauthorised!' };
   if (!grade || !section) {
     return { error: 'All fields are required' };
   }

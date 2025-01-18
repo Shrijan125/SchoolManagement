@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { GENDER, GradeName, SECTION } from '@prisma/client';
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import {
   Form,
   FormControl,
@@ -53,7 +52,7 @@ const AddStudentForm = () => {
     },
   });
 
-  async function onSubmit(value: z.infer<typeof studentFormSchema>) {
+  async function onSubmit(value: StudentFormSchema) {
     const response = await addStudent(value);
 
     if (response.error) {

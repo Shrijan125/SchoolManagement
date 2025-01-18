@@ -4,7 +4,6 @@ import bcrypt from 'bcrypt';
 import { Session, User } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 
-// Define custom types
 interface CustomUser extends User {
   role: string;
   grade: string;
