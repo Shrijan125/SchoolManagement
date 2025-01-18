@@ -2,6 +2,8 @@ import { z } from 'zod';
 export const bulkstudentFormSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   rollNO: z.string().min(1, 'Roll number is required'),
+  grade: z.string().min(1, 'Grade is required'),
+  section: z.string().min(1, 'Section is required'),
   serialNO: z.string().min(1, 'Serial number is required'),
   dob: z
     .union([

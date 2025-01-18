@@ -91,41 +91,49 @@ export async function addStudent(input: StudentFormSchema) {
 }
 
 export async function addbulkStudent({
-  grade,
-  section,
   students,
 }: {
-  grade: string;
-  section: string;
   students: BulkStudentFormSchema[];
 }) {
   const session = await getServerSession(authOptions);
   if (!session || !session?.user) return { error: 'Unauthorised!' };
-  if (!grade || !section || !students || students.length === 0) {
-    return { error: 'All fields are required' };
+  if (!students || students.length === 0) {
+    return { error: 'Students data is required' };
   }
 
   try {
-    const gradeId = await prisma.grade.findFirst({
+    const gradeDetails = await prisma.grade.findMany({
       where: {
-        name: grade as GradeName,
+        name: {
+          in: students.map((s) => s.grade as GradeName),
+        },
       },
       select: {
         id: true,
+        name: true,
         category: true,
       },
     });
 
-    if (!gradeId) {
-      return { error: 'Grade not found!' };
+    const gradeMap = Object.fromEntries(
+      gradeDetails.map((g) => [g.name, { id: g.id, category: g.category.name }])
+    );
+
+    const missingGrades = students
+      .map((s) => s.grade)
+      .filter((grade) => !gradeMap[grade]);
+    if (missingGrades.length > 0) {
+      return { error: `Grades not found: ${[...new Set(missingGrades)].join(', ')}` };
     }
 
-    const isInNursery = gradeId.category.name === CATEGORYNAME.NURSERY;
     const rollNumbers = students.map((s) =>
-      isInNursery ? s.rollNO + 'NUR' : s.rollNO,
+      gradeMap[s.grade].category === CATEGORYNAME.NURSERY
+        ? s.rollNO + 'NUR'
+        : s.rollNO
     );
+
     const duplicatesInUpload = rollNumbers.filter(
-      (num, index) => rollNumbers.indexOf(num) !== index,
+      (num, index) => rollNumbers.indexOf(num) !== index
     );
 
     if (duplicatesInUpload.length > 0) {
@@ -154,19 +162,26 @@ export async function addbulkStudent({
     }
 
     const mappedData = students.map((student) => {
+      const gradeInfo = gradeMap[student.grade];
       let dobDate: Date | null = null;
 
-      if (
-        student.dob !== undefined &&
-        student.dob !== null &&
-        student.dob !== ''
-      ) {
-        const [day, month, year] = student!.dob!.split('-');
-        dobDate = new Date(`${year}-${Number(month)}-${day}`);
+      if (student.dob) {
+        try {
+          const [day, month, year] = student.dob.split('-');
+          dobDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+        } catch (error) {
+          console.error(
+            `Error parsing date for student ${student.rollNO}:`,
+            error
+          );
+        }
       }
 
-      const studentData = {
-        rollNO: isInNursery ? student.rollNO + 'NUR' : student.rollNO,
+      return {
+        rollNO:
+          gradeInfo.category === CATEGORYNAME.NURSERY
+            ? student.rollNO + 'NUR'
+            : student.rollNO,
         name: student.name,
         fathersName: student.fathersName,
         mothersName: student.mothersName,
@@ -177,32 +192,11 @@ export async function addbulkStudent({
         alternatePhone: student.alternatePhone,
         bloodGroup: student.bloodGroup,
         serialNO: student.serialNO,
-        gradeID: gradeId.id,
-        Section: section as SECTION,
+        gradeID: gradeInfo.id,
+        Section: student.section as SECTION,
+        dob: dobDate,
         sessionID: process.env.NEXTSESSION_ID as string,
       };
-      if (student.dob && student.dob !== '' && student.dob !== 'undefined') {
-        try {
-          const [day, month, year] = student.dob.split('-');
-          if (day && month && year) {
-            const dobDate = new Date(
-              Date.UTC(Number(year), Number(month) - 1, Number(day)),
-            );
-            if (!isNaN(dobDate.getTime())) {
-              return {
-                ...studentData,
-                dob: dobDate,
-              };
-            }
-          }
-        } catch (error) {
-          console.error(
-            `Error parsing date for student ${student.rollNO}:`,
-            error,
-          );
-        }
-      }
-      return studentData;
     });
 
     await prisma.$transaction(async (tx) => {
@@ -214,6 +208,7 @@ export async function addbulkStudent({
     return { success: 'Students uploaded successfully!' };
   } catch (error) {
     if (error instanceof Error) {
+      console.error('Error while adding students:', error.message);
       if (error.message.includes('Unique constraint')) {
         return { error: 'Duplicate roll numbers found' };
       }
@@ -222,6 +217,7 @@ export async function addbulkStudent({
     return { error: 'Error while adding students' };
   }
 }
+
 
 export async function getStudentbySection({
   grade,

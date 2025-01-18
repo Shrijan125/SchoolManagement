@@ -1,13 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { GradeName, SECTION } from '@prisma/client';
 import * as XLSX from 'xlsx';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -41,8 +33,6 @@ const formatExcelDate = (serialDate: number): string => {
 };
 
 const bulkstudentUploadformSchema = z.object({
-  grade: z.string().min(1, 'Grade is required'),
-  section: z.string().min(1, 'Section is required'),
   file: z
     .instanceof(File, { message: 'File is required' })
     .refine(
@@ -59,8 +49,6 @@ const BulkStudentForm = () => {
   const form = useForm<z.infer<typeof bulkstudentUploadformSchema>>({
     resolver: zodResolver(bulkstudentUploadformSchema),
     defaultValues: {
-      grade: '',
-      section: '',
       file: undefined,
     },
   });
@@ -90,6 +78,8 @@ const BulkStudentForm = () => {
         const studentData = {
           name: String(row.Name || ''),
           rollNO: String(row.Admno || ''),
+          grade: String(row.Class || ''),
+          section: String(row.Section || ''),
           serialNO: String(row['Roll No'] || ''),
           fathersName: String(row["Father's Name"] || ''),
           mothersName: String(row["Mother's Name"] || ''),
@@ -138,27 +128,21 @@ const BulkStudentForm = () => {
         setValidationErrors(errors);
         setShowErrorDialog(true);
         form.reset({
-          grade: '',
-          section: '',
           file: undefined,
         });
         return;
       }
       const response = await addbulkStudent({
-        grade: value.grade,
-        section: value.section,
         students: data,
       });
       if (response.error) {
         toast({
-          description: 'Failed to upload Student',
+          description: response.error,
           variant: 'destructive',
         });
-        // form.reset({
-        //   grade: '',
-        //   section: '',
-        //   file: undefined,
-        // });
+        form.reset({
+          file: undefined,
+        });
         return;
       }
       if (response.success) {
@@ -167,8 +151,6 @@ const BulkStudentForm = () => {
       }
     } catch (error) {
       form.reset({
-        grade: '',
-        section: '',
         file: undefined,
       });
       if (error instanceof Error) {
@@ -188,62 +170,6 @@ const BulkStudentForm = () => {
           onSubmit={form.handleSubmit(onSubmit)}
           className="sm:space-y-8 space-y-5"
         >
-          <FormField
-            control={form.control}
-            name="grade"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Grade</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a Grade" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(GradeName).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        {GradeName[key as keyof typeof GradeName]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="section"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Section</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a Section" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {Object.values(SECTION).map((key) => (
-                      <SelectItem key={key} value={key}>
-                        {SECTION[key as keyof typeof SECTION]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="file"
